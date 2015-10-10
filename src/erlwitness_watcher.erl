@@ -38,7 +38,7 @@
     {stop, Reason :: term(), NewState :: term()}.
 
 
--define(PROCDIC_WATCHER_MODULE, '$erlwitness.watcher_module').
+-define(PROCDIC_WATCHER_MODULE, 'erlwitness/watcher_module').
 -define(WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType, EntityProcState, Event),
         {'WITNESS', Timestamp, {Entity, EntityPid, EntityProcType, EntityProcState}, Event}).
 
@@ -50,7 +50,7 @@
 %%%===================================================================
 -spec get_entity_dbg_options(Entity :: erlwitness:entity(), EntityProcType :: erlwitness:process_type()) -> [sys:dbg_opt()].
 get_entity_dbg_options(Entity, EntityProcType) ->
-    Watchers = erlwitness_lobby:lookup_local_watchers(Entity),
+    Watchers = erlwitness_lobby:watchers_local_lookup(Entity),
     [dbg_fun(Entity, EntityProcType, Watcher) || Watcher <- Watchers].
 
 -spec watch(Entity :: erlwitness:entity()) -> ok.

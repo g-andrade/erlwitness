@@ -6,7 +6,7 @@
 -export([watch/2,
          unwatch/2,
          unwatch_by_pid/1,
-         lookup_local_watchers/1,
+         watchers_local_lookup/1,
          is_entity_watched_by/2]).
 
 -export([start_link/0]).
@@ -57,8 +57,8 @@ unwatch_by_pid(WatcherPid) ->
     abcast = gen_server:abcast(?SERVER, {unwatch_pid, WatcherPid}),
     ok.
 
--spec lookup_local_watchers(Entity :: erlwitness:entity()) -> [pid()].
-lookup_local_watchers(Entity) ->
+-spec watchers_local_lookup(Entity :: erlwitness:entity()) -> [pid()].
+watchers_local_lookup(Entity) ->
     Watchers = ets:lookup(?TABLE, Entity),
     [Watcher#watcher.watcher_pid || Watcher <- Watchers].
 
@@ -97,6 +97,7 @@ init([]) ->
     ?TABLE = ets:new(?TABLE, [bag, named_table, protected,
                               {keypos, #watcher.entity},
                               {read_concurrency, true}]),
+    ok = net_kernel:monitor_nodes(true, [{node_type, visible}]),
     {ok, #state{}}.
 
 %%--------------------------------------------------------------------
@@ -113,26 +114,9 @@ init([]) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_call({watch, #watcher{ entity=Entity, watcher_pid=Pid }=Watcher}, _From, State)
-        when is_pid(Pid), Pid /= self()
-        ->
-    Monitors = State#state.monitored_watchers,
-    case {lists:member(Watcher, ets:lookup(?TABLE, Entity)),
-          lists:keymember(Pid, 2, Monitors)}
-    of
-        {true, true} ->
-            {reply, ok, State};
-        {false, true} ->
-            % We're already monitoring this watcher
-            true = ets:insert(?TABLE, Watcher),
-            {reply, ok, State};
-        {false, false} ->
-            Monitor = monitor(process, Pid),
-            NewMonitors = [{Monitor, Pid} | State#state.monitored_watchers],
-            NewState = State#state{ monitored_watchers=NewMonitors },
-            true = ets:insert(?TABLE, Watcher),
-            {reply, ok, NewState}
-    end;
+handle_call({watch, #watcher{ watcher_pid=Pid }=Watcher}, _From, State)
+        when is_pid(Pid), Pid /= self() ->
+    {reply, ok, handle_registration(State, Watcher)};
 
 handle_call(_Request, _From, State) ->
     {noreply, State}.
@@ -147,6 +131,10 @@ handle_call(_Request, _From, State) ->
 %%                                  {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+handle_cast({watch, #watcher{ watcher_pid=Pid }=Watcher}, State)
+        when is_pid(Pid), Pid /= self() ->
+    {noreply, handle_registration(State, Watcher)};
+
 handle_cast({unwatch, #watcher{ watcher_pid=Pid }}=Watcher, State) when is_pid(Pid) ->
     true = ets:delete_object(?TABLE, Watcher),
     case ets:match(?TABLE, #watcher{ entity='$1', watcher_pid=Pid }) of
@@ -172,6 +160,16 @@ handle_cast(_Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+handle_info({nodeup, Node, _}, #state{}=State) ->
+    MatchSpec = ets:fun2ms(fun(#watcher{ watcher_pid=Pid }=Watcher) when node(Pid) == node() -> Watcher end),
+    LocalWatchers = ets:select(?TABLE, MatchSpec),
+    lists:foreach(fun (#watcher{}=Watcher) -> gen_server:cast({?SERVER, Node}, {watch, Watcher}) end,
+                  LocalWatchers),
+    {noreply, State};
+
+handle_info({nodedown, _Node, _}, #state{}=State) ->
+    {noreply, State};
+
 handle_info({'DOWN', _Ref, process, Pid, _Reason}, #state{}=State) ->
     {noreply, handle_pid_unregistration(State, Pid)};
 
@@ -212,3 +210,23 @@ handle_pid_unregistration(#state{ monitored_watchers=Monitors }=State, Pid) ->
     NewMonitors = lists:keydelete(Pid, 2, Monitors),
     true = ets:match_delete(?TABLE, #watcher{ entity='_', watcher_pid=Pid }),
     State#state{ monitored_watchers=NewMonitors }.
+
+-spec handle_registration(#state{}, #watcher{}) -> #state{}.
+handle_registration(#state{ monitored_watchers=Monitors }=State,
+                    #watcher{ entity=Entity, watcher_pid=Pid }=Watcher) ->
+    case {lists:member(Watcher, ets:lookup(?TABLE, Entity)),
+          lists:keymember(Pid, 2, Monitors)}
+    of
+        {true, true} ->
+            State;
+        {false, true} ->
+            % We're already monitoring this watcher
+            true = ets:insert(?TABLE, Watcher),
+            State;
+        {false, false} ->
+            Monitor = monitor(process, Pid),
+            NewMonitors = [{Monitor, Pid} | Monitors],
+            NewState = State#state{ monitored_watchers=NewMonitors },
+            true = ets:insert(?TABLE, Watcher),
+            NewState
+    end.
