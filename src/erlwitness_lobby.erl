@@ -24,12 +24,12 @@
 
 -record(state, {
         monitored_watchers = [] :: [{Monitor :: reference(), WatcherPid :: pid()}]
-}).
+        }).
 
 -record(watcher, {
         entity :: erlwitness:entity(),
         watcher_pid :: pid()
-}).
+        }).
 
 
 -define(TABLE, ?MODULE).
@@ -41,14 +41,14 @@
 -spec watch(Entity :: erlwitness:entity(), WatcherPid :: pid()) -> boolean().
 watch(Entity, WatcherPid) ->
     Watcher = #watcher{entity = Entity,
-                         watcher_pid = WatcherPid},
+                       watcher_pid = WatcherPid},
     {Replies, _BadNodes} = gen_server:multi_call(?SERVER, {watch, Watcher}),
     length(Replies) > 0.
 
 -spec unwatch(Entity :: erlwitness:entity(), WatcherPid :: pid()) -> ok.
 unwatch(Entity, WatcherPid) ->
     Watcher = #watcher{entity = Entity,
-                         watcher_pid = WatcherPid},
+                       watcher_pid = WatcherPid},
     abcast = gen_server:abcast(?SERVER, {unwatch, Watcher}),
     ok.
 
@@ -64,7 +64,8 @@ lookup_local_watchers(Entity) ->
 
 -spec is_entity_watched_by(Entity :: erlwitness:entity(), WatcherPid :: pid()) -> boolean().
 is_entity_watched_by(Entity, WatcherPid) ->
-    ets:member(?TABLE, #watcher{entity = Entity, watcher_pid=WatcherPid}).
+    lists:member(#watcher{entity = Entity, watcher_pid=WatcherPid},
+                 ets:lookup(?TABLE, Entity)).
 
 
 %%--------------------------------------------------------------------
@@ -114,7 +115,7 @@ init([]) ->
 %%--------------------------------------------------------------------
 handle_call({watch, #watcher{ entity=Entity, watcher_pid=Pid }=Watcher}, _From, State)
         when is_pid(Pid), Pid /= self()
-->
+        ->
     Monitors = State#state.monitored_watchers,
     case {lists:member(Watcher, ets:lookup(?TABLE, Entity)),
           lists:keymember(Pid, 2, Monitors)}
