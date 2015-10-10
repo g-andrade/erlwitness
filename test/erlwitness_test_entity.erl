@@ -19,13 +19,16 @@
 
 
 start_link(Entity, EntityProcType) ->
-    erlwitness_gen_serv:start_link(Entity, EntityProcType, ?MODULE, [], []).
+    {WrappedArgs, StartOptions} = erlwitness:get_starting_extras(Entity, EntityProcType),
+    gen_server:start_link(?MODULE, WrappedArgs, StartOptions).
 
 start(Entity, EntityProcType) ->
-    erlwitness_gen_serv:start(Entity, EntityProcType, ?MODULE, [], []).
+    {WrappedArgs, StartOptions} = erlwitness:get_starting_extras(Entity, EntityProcType),
+    gen_server:start(?MODULE, WrappedArgs, StartOptions).
 
-init([]) ->
-    {ok, #state{}}.
+init(WrappedArgs) ->
+    [] = erlwitness:unwrap_init_args(WrappedArgs),
+    erlwitness:finalize_init(WrappedArgs, {ok, #state{}}).
 
 handle_call(die, _From, State) ->
     {stop, normal, ok, State};
