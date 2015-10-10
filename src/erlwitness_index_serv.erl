@@ -51,7 +51,7 @@ child_spec(Id) ->
                       EntityPid :: pid()) -> ok.
 register_entity(Entity, EntityProcType, EntityPid) when is_pid(EntityPid), node(EntityPid) == node() ->
     Id = pick_id(Entity, EntityProcType, EntityPid),
-    ok = gen_server:call(server_for_id(Id), {index, Entity, EntityProcType, EntityPid}, infinity).
+    ok = gen_server:call(server_for_id(Id), {register, Entity, EntityProcType, EntityPid}).
 
 
 %%--------------------------------------------------------------------
@@ -116,7 +116,7 @@ handle_call({register, Entity, EntityProcType, Pid}, _From, #state{}=State) ->
                                     pid = Pid,
                                     monitor = monitor(process, Pid)},
     true = ets:insert_new(State#state.table, IndexedEntity),
-    {noreply, State};
+    {reply, ok, State};
 
 handle_call(_Request, _From, State) ->
     {noreply, State}.

@@ -39,7 +39,7 @@
 %%% API functions
 %%%===================================================================
 -spec watch(Entity :: erlwitness:entity(), WatcherPid :: pid()) -> boolean().
-watch(Entity, WatcherPid) ->
+watch(Entity, WatcherPid) when is_pid(WatcherPid) ->
     Watcher = #watcher{entity = Entity,
                        watcher_pid = WatcherPid},
     {Replies, _BadNodes} = gen_server:multi_call(?SERVER, {watch, Watcher}),

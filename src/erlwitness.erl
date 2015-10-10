@@ -8,7 +8,8 @@
 -type entity() :: any().
 -type process_type() :: any().
 
--spec get_entity_dbg_options(Entity :: entity(), EntityProcType :: process_type()) -> [sys:dbg_opt()].
+-spec get_entity_dbg_options(Entity :: entity(), EntityProcType :: process_type())
+        -> [{install, {erlwitness_watcher:dbg_fun(), erlwitness_watcher:dbg_fun_state()}}].
 get_entity_dbg_options(Entity, EntityProcType) ->
     erlwitness_watcher:get_entity_dbg_options(Entity, EntityProcType).
 

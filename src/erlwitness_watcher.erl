@@ -4,11 +4,15 @@
 
 %% API functions
 -export([start_link/3,
+         start_link/4,
          start/3,
+         start/4,
          get_entity_dbg_options/2,
+         get_entity_dbg_options/3,
          watch/1,
          unwatch/1,
-         unwatch_all/0]).
+         unwatch_all/0,
+         report_init/7]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -18,40 +22,82 @@
          terminate/2,
          code_change/3]).
 
+-export_type([dbg_fun/0, dbg_fun_state/0, handler_return/0]).
+
 -ignore_xref([{behaviour_info, 1},
               {start, 3},
+              {start, 4},
               {start_link, 3},
+              {start_link, 4},
               {watch, 1},
               {unwatch, 1},
               {unwatch_all, 0}]).
 
 
--callback handle_event(Timestamp :: erlang:timestamp(),
-                       Entity :: erlwitness:entity(),
-                       EntityPid :: pid(),
-                       EntityProcType :: erlwitness:process_type(),
-                       EntityProcState :: term(),
-                       Event :: term(),
-                       State :: term()) ->
+-type handler_return() ::
     {noreply, NewState :: term()} |
     {noreply, NewState :: term(), timeout() | hibernate} |
     {stop, Reason :: term(), NewState :: term()}.
 
+-callback handle_gencall_event(Timestamp :: erlang:timestamp(),
+                               Entity :: erlwitness:entity(),
+                               EntityPid :: pid(),
+                               EntityProcType :: erlwitness:process_type(),
+                               EntityProcName :: term(),
+                               Call :: term(),
+                               From :: {pid(), reference()},
+                               State :: term()) -> handler_return().
+
+-callback handle_gencast_event(Timestamp :: erlang:timestamp(),
+                               Entity :: erlwitness:entity(),
+                               EntityPid :: pid(),
+                               EntityProcType :: erlwitness:process_type(),
+                               EntityProcName :: term(),
+                               Cast :: term(),
+                               State :: term()) -> handler_return().
+
+-callback handle_geninfo_event(Timestamp :: erlang:timestamp(),
+                               Entity :: erlwitness:entity(),
+                               EntityPid :: pid(),
+                               EntityProcType :: erlwitness:process_type(),
+                               EntityProcName :: term(),
+                               Info :: term(),
+                               State :: term()) -> handler_return().
+
+-callback handle_newstate_event(Timestamp :: erlang:timestamp(),
+                                Entity :: erlwitness:entity(),
+                                EntityPid :: pid(),
+                                EntityProcType :: erlwitness:process_type(),
+                                EntityProcName :: term(),
+                                EntityProcState :: term(),
+                                State :: term()) -> handler_return().
+
 
 -define(PROCDIC_WATCHER_MODULE, 'erlwitness/watcher_module').
--define(WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType, EntityProcState, Event),
-        {'WITNESS', Timestamp, {Entity, EntityPid, EntityProcType, EntityProcState}, Event}).
+-define(PROCDIC_ENTITY_STATE(Pid), {'erlwitness/entity_state', Pid}).
 
--type dbg_fun(FuncStateT) :: fun ((FuncState :: FuncStateT, Event :: any(), State :: any())
-                                  -> NewFuncState :: FuncStateT).
+
+-define(WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, Event),
+        {'WITNESS', Timestamp, {Entity, EntityPid, EntityProcType, EntityProcName}, Event}).
+
+-type dbg_fun_state() :: active | idle.
+-type dbg_fun() :: fun ((FuncState :: dbg_fun_state(), Event :: any(), ProcName :: any())
+                        -> NewFuncState :: dbg_fun_state()).
 
 %%%===================================================================
 %%% API functions
 %%%===================================================================
--spec get_entity_dbg_options(Entity :: erlwitness:entity(), EntityProcType :: erlwitness:process_type()) -> [sys:dbg_opt()].
+-spec get_entity_dbg_options(Entity :: erlwitness:entity(), EntityProcType :: erlwitness:process_type())
+    -> [{install, {dbg_fun(), dbg_fun_state()}}].
 get_entity_dbg_options(Entity, EntityProcType) ->
     Watchers = erlwitness_lobby:watchers_local_lookup(Entity),
-    [dbg_fun(Entity, EntityProcType, Watcher) || Watcher <- Watchers].
+    get_entity_dbg_options(Entity, EntityProcType, Watchers).
+
+-spec get_entity_dbg_options(Entity :: erlwitness:entity(), EntityProcType :: erlwitness:process_type(),
+                             Watchers :: [pid()])
+    -> [{install, {dbg_fun(), dbg_fun_state()}}].
+get_entity_dbg_options(Entity, EntityProcType, Watchers) ->
+    [{install, dbg_fun(Entity, EntityProcType, Watcher)} || Watcher <- Watchers].
 
 -spec watch(Entity :: erlwitness:entity()) -> ok.
 watch(Entity) ->
@@ -79,6 +125,10 @@ unwatch_all() ->
     Watcher = self(),
     ok = erlwitness_lobby:unwatch_by_pid(Watcher).
 
+report_init(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, EntityProcState) ->
+    ok = gen_server:cast(Watcher, ?WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType,
+                                                   EntityProcName, {init, EntityProcState})).
+
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -90,8 +140,14 @@ unwatch_all() ->
 start_link(Entity, WatcherModule, WatcherArgs) ->
     gen_server:start_link(?MODULE, [Entity, WatcherModule, WatcherArgs], []).
 
+start_link(Name, Entity, WatcherModule, WatcherArgs) ->
+    gen_server:start_link(Name, ?MODULE, [Entity, WatcherModule, WatcherArgs], []).
+
 start(Entity, WatcherModule, WatcherArgs) ->
     gen_server:start(?MODULE, [Entity, WatcherModule, WatcherArgs], []).
+
+start(Name, Entity, WatcherModule, WatcherArgs) ->
+    gen_server:start(Name, ?MODULE, [Entity, WatcherModule, WatcherArgs], []).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -111,7 +167,7 @@ start(Entity, WatcherModule, WatcherArgs) ->
 init([Entity, WatcherModule, WatcherArgs]) ->
     undefined = put(?PROCDIC_WATCHER_MODULE, WatcherModule),
     gen_server:cast(self(), {watch, Entity}),
-    apply(WatcherModule, init, WatcherArgs).
+    WatcherModule:init(WatcherArgs).
 
 %%--------------------------------------------------------------------
 %% @private
@@ -144,9 +200,39 @@ handle_cast({watch, Entity}, State) ->
     ok = watch(Entity),
     {noreply, State};
 
-handle_cast(?WITNESSED_EVENT(EntityPid, Timestamp, Event, EntityProcState, Entity, EntityProcType), State) ->
+handle_cast(?WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, Event), State) ->
     WatcherModule = get(?PROCDIC_WATCHER_MODULE),
-    WatcherModule:handle_event(EntityPid, Timestamp, Event, EntityProcState, Entity, EntityProcType, State);
+    case Event of
+        {dbg, {in, {'$gen_call', From, Call}}} ->
+            WatcherModule:handle_gencall_event(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName,
+                                               Call, From, State);
+        {dbg, {in, {'$gen_cast', Cast}}} ->
+            WatcherModule:handle_gencast_event(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName,
+                                               Cast, State);
+        {dbg, {in, Info}} ->
+            WatcherModule:handle_geninfo_event(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName,
+                                               Info, State);
+        {dbg, {noreply, EntityProcState}} ->
+            case get(?PROCDIC_ENTITY_STATE(EntityPid)) =:= EntityProcState of
+                true  -> {noreply, State};
+                false ->
+                    put(?PROCDIC_ENTITY_STATE(EntityPid), EntityProcState),
+                    WatcherModule:handle_newstate_event(Timestamp, Entity, EntityPid, EntityProcType,
+                                                        EntityProcName, EntityProcState, State)
+            end;
+        {dbg, {out, _Reply, _To, EntityProcState}} ->
+            case get(?PROCDIC_ENTITY_STATE(EntityPid)) =:= EntityProcState of
+                true  -> {noreply, State};
+                false ->
+                    put(?PROCDIC_ENTITY_STATE(EntityPid), EntityProcState),
+                    WatcherModule:handle_newstate_event(Timestamp, Entity, EntityPid, EntityProcType,
+                                                        EntityProcName, EntityProcState, State)
+            end;
+        {init, EntityProcState} ->
+            undefined = put(?PROCDIC_ENTITY_STATE(EntityPid), EntityProcState),
+            WatcherModule:handle_newstate_event(Timestamp, Entity, EntityPid, EntityProcType,
+                                                EntityProcName, EntityProcState, State)
+    end;
 
 handle_cast(Msg, State) ->
     (get(?PROCDIC_WATCHER_MODULE)):handle_cast(Msg, State).
@@ -198,22 +284,22 @@ lookup_global_entity(Entity) ->
     Module = erlwitness_conf:get_lookup_module(),
     Module:lookup_global_entity(Entity).
 
-report_event(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcState, Event) ->
+report_dbg_event(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, Event) ->
     ok = gen_server:cast(Watcher,  ?WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType,
-                                                    EntityProcState, Event)).
+                                                    EntityProcName, {dbg, Event})).
 
 -spec dbg_fun(Entity :: erlwitness:entity(), EntityProcType :: erlwitness:process_type(), Watcher :: pid())
-        -> {dbg_fun(active | idle), FuncState :: active}.
+    -> {dbg_fun(), FuncState :: active}.
 dbg_fun(Entity, EntityProcType, Watcher) ->
     Fun = fun
-        (_PrevState, Event, EntityProcState) ->
+        (_PrevState, Event, EntityProcName) ->
             case erlwitness_lobby:is_entity_watched_by(Entity, Watcher) of
                 false -> idle;
                 true  ->
                     Timestamp = os:timestamp(),
-                    ok = report_event(Watcher, Timestamp, Entity, self(),
-                                      EntityProcType, EntityProcState,
-                                      Event),
+                    ok = report_dbg_event(Watcher, Timestamp, Entity, self(),
+                                          EntityProcType, EntityProcName,
+                                          Event),
                     active
             end
     end,
