@@ -1,0 +1,13 @@
+% vim: set expandtab softtabstop=4 shiftwidth=4:
+{application, erlwitness,
+    [
+        {description, "On-demand semantic process group watchtower"},
+        {vsn, "1.0.0"},
+        {registered, []},
+        {applications, [
+                kernel,
+                stdlib
+                ]},
+        {mod, { erlwitness_app, []}},
+        {env, []}
+        ]}.

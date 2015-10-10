@@ -5,6 +5,8 @@ ct_*.css
 ct_log*
 ct_run*
 deps
+.deps_plt
+.dialyzerignore
 .dialyzer_plt
 ebin
 erl_crash.dump
