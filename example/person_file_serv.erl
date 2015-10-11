@@ -1,6 +1,6 @@
 % vim: set expandtab softtabstop=4 shiftwidth=4:
 -module(person_file_serv).
--author('Guilherme Andrade <erlwitness(at)gandrade(got)net>').
+-author('Guilherme Andrade <erlwitness(at)gandrade(dot)net>').
 
 -behaviour(gen_server).
 
