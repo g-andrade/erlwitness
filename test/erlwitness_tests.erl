@@ -1,6 +1,6 @@
 % vim: set expandtab softtabstop=4 shiftwidth=4:
 -module(erlwitness_tests).
--author('Guilherme Andrade <erlwitness(at)(dot)net>').
+-author('Guilherme Andrade <erlwitness(at)gandrade(got)net>').
 
 -include_lib("eunit/include/eunit.hrl").
 
