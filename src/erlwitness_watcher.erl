@@ -10,6 +10,7 @@
          start/3,
          start/4,
          get_entity_dbg_options/3,
+         install_dbg_fun/4,
          watch/1,
          unwatch/1,
          unwatch_all/0,
@@ -30,6 +31,7 @@
               {start, 4},
               {start_link, 3},
               {start_link, 4},
+              {install_dbg_fun, 4},
               {watch, 1},
               {unwatch, 1},
               {unwatch_all, 0}]).
@@ -94,6 +96,16 @@
 get_entity_dbg_options(Entity, EntityProcType, Watchers) ->
     [{install, dbg_fun(Entity, EntityProcType, Watcher)} || Watcher <- Watchers].
 
+
+-spec install_dbg_fun(Entity :: erlwitness:entity(),
+                      EntityProcType :: erlwitness:process_type(),
+                      EntityPid :: pid(),
+                      Watcher :: pid()) -> any().
+install_dbg_fun(Entity, EntityProcType, EntityPid, Watcher) ->
+    Dbgfun = dbg_fun(Entity, EntityProcType, Watcher),
+    catch sys:install(EntityPid, Dbgfun, 20).
+
+
 -spec watch(Entity :: erlwitness:entity()) -> ok.
 watch(Entity) ->
     Watcher = self(),
@@ -104,9 +116,9 @@ watch(Entity) ->
     % Inject into existing procs
     IndexedEntityRefs = lookup_global_entity(Entity),
     ok = lists:foreach(
-            fun ({EntityProcType, Pid}) ->
-                    Dbgfun = dbg_fun(Entity, EntityProcType, Watcher),
-                    catch sys:install(Pid, Dbgfun, 20)
+            fun ({EntityProcType, EntityPid}) ->
+                    catch rpc:cast(node(EntityPid), ?MODULE, install_dbg_fun,
+                                   [Entity, EntityProcType, EntityPid, Watcher])
             end,
             IndexedEntityRefs).
 
