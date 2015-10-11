@@ -19,11 +19,11 @@
 
 
 start_link(Entity, EntityProcType) ->
-    {WrappedArgs, StartOptions} = erlwitness:get_starting_extras(Entity, EntityProcType),
+    {WrappedArgs, StartOptions} = erlwitness:get_start_extras(Entity, EntityProcType),
     gen_server:start_link(?MODULE, WrappedArgs, StartOptions).
 
 start(Entity, EntityProcType) ->
-    {WrappedArgs, StartOptions} = erlwitness:get_starting_extras(Entity, EntityProcType),
+    {WrappedArgs, StartOptions} = erlwitness:get_start_extras(Entity, EntityProcType),
     gen_server:start(?MODULE, WrappedArgs, StartOptions).
 
 init(WrappedArgs) ->

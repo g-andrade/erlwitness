@@ -1,17 +1,17 @@
 % vim: set expandtab softtabstop=4 shiftwidth=4:
 -module(erlwitness).
--export([get_starting_extras/2,
-         get_starting_extras/3,
-         get_starting_extras/4,
+-export([get_start_extras/2,
+         get_start_extras/3,
+         get_start_extras/4,
          unwrap_init_args/1,
          finalize_init/2
         ]).
 
 -export_type([entity/0, process_type/0, wrapped_init_args/0, init_result/0]).
 
--ignore_xref([{get_starting_extras, 2},
-              {get_starting_extras, 3},
-              {get_starting_extras, 4},
+-ignore_xref([{get_start_extras, 2},
+              {get_start_extras, 3},
+              {get_start_extras, 4},
               {unwrap_init_args, 1},
               {finalize_init, 2}]).
 
@@ -29,22 +29,22 @@
 -type init_result() :: {ok, S::term()} | {ok, S::term(), timeout()} | ignore | {stop, Reason::term()}.
 
 
--spec get_starting_extras(Entity :: entity(), EntityProcType :: process_type())
+-spec get_start_extras(Entity :: entity(), EntityProcType :: process_type())
     -> {WrappedInitArgs :: #wrapped_init_args{}, StartOptions :: [term()]}.
-get_starting_extras(Entity, EntityProcType) ->
-    get_starting_extras(Entity, EntityProcType, []).
+get_start_extras(Entity, EntityProcType) ->
+    get_start_extras(Entity, EntityProcType, []).
 
--spec get_starting_extras(Entity :: entity(), EntityProcType :: process_type(),
-                          Args :: term())
+-spec get_start_extras(Entity :: entity(), EntityProcType :: process_type(),
+                       Args :: term())
     -> {WrappedInitArgs :: #wrapped_init_args{}, StartOptions :: [term()]}.
-get_starting_extras(Entity, EntityProcType, Args) ->
-    get_starting_extras(Entity, EntityProcType, Args, []).
+get_start_extras(Entity, EntityProcType, Args) ->
+    get_start_extras(Entity, EntityProcType, Args, []).
 
--spec get_starting_extras(Entity :: entity(), EntityProcType :: process_type(),
-                          Args :: term(), BaseStartOptions :: [term()])
+-spec get_start_extras(Entity :: entity(), EntityProcType :: process_type(),
+                       Args :: term(), BaseStartOptions :: [term()])
     -> {WrappedInitArgs :: #wrapped_init_args{}, StartOptions :: [term()]}.
     %DebugOptions :: [{install, {erlwitness_watcher:dbg_fun(), erlwitness_watcher:dbg_fun_state()}}]}.
-get_starting_extras(Entity, EntityProcType, Args, BaseStartOptions) ->
+get_start_extras(Entity, EntityProcType, Args, BaseStartOptions) ->
     {StartOptions, Watchers} = merge_dbg_options(Entity, EntityProcType, BaseStartOptions),
     WrappedInitArgs = #wrapped_init_args{watchers = Watchers,
                                          entity = Entity,

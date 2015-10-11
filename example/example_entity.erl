@@ -19,13 +19,13 @@
 
 
 start_link(Person, Files, LuckyNumber) ->
-    {WrappedArgs, StartOptions} = erlwitness:get_starting_extras(Person, person_file_serv,
-                                                                 [Files, LuckyNumber]),
+    {WrappedArgs, StartOptions} = erlwitness:get_start_extras(Person, person_file_serv,
+                                                              [Files, LuckyNumber]),
     gen_server:start_link(?MODULE, WrappedArgs, StartOptions).
 
 start(Person, Files, LuckyNumber) ->
-    {WrappedArgs, StartOptions} = erlwitness:get_starting_extras(Person, person_file_serv,
-                                                                 [Files, LuckyNumber]),
+    {WrappedArgs, StartOptions} = erlwitness:get_start_extras(Person, person_file_serv,
+                                                              [Files, LuckyNumber]),
     gen_server:start(?MODULE, WrappedArgs, StartOptions).
 
 
