@@ -37,9 +37,12 @@ watcher_before_entity() ->
     {ok, EntityProc} = erlwitness_test_entity:start_link(Entity, EntityProcType),
     ?assertMatch({EntityProc, EntityProcType, {new_state, _}, WatcherProc}, recv_msg()),
 
-    Cast = "a cast",
+    Cast = {log_message, "a cast"},
     gen_server:cast(EntityProc, Cast),
     ?assertEqual({EntityProc, EntityProcType, {cast, Cast}, WatcherProc}, recv_msg()),
+    ?assertMatch({EntityProc, EntityProcType, {lager, {lager, debug, _},
+                                               {erlwitness_test_entity, handle_cast, _}},
+                  WatcherProc}, recv_msg()),
 
     Call = <<"a call">>,
     ok = gen_server:call(EntityProc, Call),
@@ -70,9 +73,12 @@ entity_before_watcher() ->
     {ok, WatcherProc} = erlwitness_test_watcher:start_link([Entity], Self),
     timer:sleep(10),
 
-    Cast = "a cast",
+    Cast = {log_message, "a cast"},
     ok = gen_server:cast(EntityProc, Cast),
     ?assertEqual({EntityProc, EntityProcType, {cast, Cast}, WatcherProc}, recv_msg()),
+    ?assertMatch({EntityProc, EntityProcType, {lager, {lager, debug, _},
+                                               {erlwitness_test_entity, handle_cast, _}},
+                  WatcherProc}, recv_msg()),
     ?assertMatch({EntityProc, EntityProcType, {new_state, _}, WatcherProc}, recv_msg()),
 
     Call = <<"a call">>,

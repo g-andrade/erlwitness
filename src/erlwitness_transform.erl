@@ -8,17 +8,13 @@
 
 -include_lib("lager/include/lager.hrl").
 
-
 %% @private
 parse_transform(AST, _Options) ->
-    %% .app file should either be in the outdir, or the same dir as the source file
-    %guess_application(proplists:get_value(outdir, Options), hd(AST)),
     walk_ast([], AST).
 
 walk_ast(Acc, []) ->
     lists:reverse(Acc);
 walk_ast(Acc, [{attribute, _, module, {Module, _PmodArgs}}=H|T]) ->
-    %% A wild parameterized module appears!
     put(module, Module),
     walk_ast([H|Acc], T);
 walk_ast(Acc, [{attribute, _, module, Module}=H|T]) ->
@@ -41,14 +37,12 @@ walk_body(Acc, []) ->
 walk_body(Acc, [H|T]) ->
     walk_body([transform_statement(H)|Acc], T).
 
-transform_statement({call, Line, {remote, _Line1, {atom, _Line2, Module},
+transform_statement({call, Line, {remote, _Line1, {atom, _Line2, lager=Module},
                                   {atom, _Line3, Function}}, Arguments0} = Stmt) 
 ->
-    case lists:member(Function, ?LEVELS) orelse lists:keymember(Function, 1, ?LEVELS_UNSAFE) of
-        true when Module /= erlwitness ->
-            % Transform our copy and place it before the original call 
-            % (it must be place before in order to avoid conflicts derived from common line numbers.)
-            blockify_stmts(Line, [do_transform(Line, Function, Arguments0),
+    case (lists:member(Function, ?LEVELS) orelse lists:keymember(Function, 1, ?LEVELS_UNSAFE)) of
+        true ->
+            blockify_stmts(Line, [do_transform(Line, Module, Function, Arguments0),
                                   Stmt]);
         false ->
             Stmt
@@ -60,19 +54,14 @@ transform_statement(Stmt) when is_list(Stmt) ->
 transform_statement(Stmt) ->
     Stmt.
 
-do_transform(Line, Function, Arguments0) ->
-    % 1) Wrap our potential lager call into a checker for watching
-    % 2) Overwrite sink with our own
-    LagerStmt = {call, Line, 
-                 {remote, Line, {atom, Line, erlwitness}, {atom, Line, Function}},
-                 Arguments0},
-
-    FunifiedLagerStmt = funify_stmts(Line, [LagerStmt]),
-
+do_transform(Line, LagerModule, LagerFunction, LagerArguments) ->
+    % Let's make sure we don't end up exporting any conflicting case variables
     EntityVar = list_to_atom("ErlWitness_LagerWrapper_SelfEntity_" ++ integer_to_list(Line)),
+    WatchersVar = list_to_atom("ErlWitness_LagerWrapper_Watchers_" ++ integer_to_list(Line)),
+
     {'case',Line,
      {call,Line,
-      {remote,Line,{atom,Line,erlwitness_entity},{atom,Line,get}},
+      {remote,Line,{atom,Line,erlwitness_entity},{atom,Line,get_entity}},
       []},
      [{clause,Line,[{atom,Line,undefined}],[],[{atom,Line,ok}]},
       {clause,Line,
@@ -82,13 +71,32 @@ do_transform(Line, Function, Arguments0) ->
          {call,Line,
           {remote,Line,
            {atom,Line,erlwitness_lobby},
-           {atom,Line,is_entity_watched}},
+           {atom,Line,watchers_local_lookup}},
           [{var,Line,EntityVar}]},
-         [{clause,Line,[{atom,Line,false}],[],[{atom,Line,ok}]},
-          {clause,Line,[{atom,Line,true}],[],[FunifiedLagerStmt]}]}]}]}.
-
-funify_stmts(Line, Stmts) ->
-    {call, Line, {'fun',Line, {clauses,[{clause,Line,[],[], Stmts}]}}, []}.
+         [{clause,Line,[{nil,Line}],[],[{atom,Line,ok}]},
+          {clause,Line,
+           [{match,Line,
+             {cons,Line,{var,Line,'_'},{var,Line,'_'}},
+             {var,Line,WatchersVar}}],
+           [],
+           [{call,Line,
+             {remote,Line,
+              {atom,Line,erlwitness_entity},
+              {atom,Line,report_lager_event}},
+             [{var,Line,WatchersVar},
+              {var,Line,EntityVar},
+              {atom,Line,LagerModule},
+              {atom,Line,LagerFunction},
+              tailify_list(Line, LagerArguments),
+              {atom, Line, get(module)},
+              {atom, Line, get(function)},
+              {integer, Line, Line}
+              ]}]}]}]}]}.
 
 blockify_stmts(Line, Stmts) ->
     {block, Line, Stmts}.
+
+tailify_list(Line, []) -> {nil, Line};
+tailify_list(Line, [H|T]) ->
+    %{cons,1,{string,1,"nheeeeee"},{nil,1}}
+    {cons, Line, H, tailify_list(Line, T)}.

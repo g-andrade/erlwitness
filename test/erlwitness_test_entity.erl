@@ -45,7 +45,7 @@ handle_cast(change_state, State) ->
     {noreply, State#state{ value=os:timestamp() }};
 
 handle_cast({log_message, Message}, State) when is_list(Message) ->
-    lager:debug("~p", Message),
+    lager:debug("~p", [Message]),
     {noreply, State};
 
 handle_cast(_Msg, State) ->
@@ -59,5 +59,3 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
-
-

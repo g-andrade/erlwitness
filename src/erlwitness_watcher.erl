@@ -14,7 +14,8 @@
          watch/1,
          unwatch/1,
          unwatch_all/0,
-         report_init/7]).
+         report_init/7,
+         report_lager_event/12]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -41,6 +42,9 @@
     {noreply, NewState :: term()} |
     {noreply, NewState :: term(), timeout() | hibernate} |
     {stop, Reason :: term(), NewState :: term()}.
+
+-type lager_mfa() :: {module(), function(), list()}.
+-type lager_debug_info() :: {CodeModule :: module(), CodeFunction :: atom(), CodeLine :: pos_integer()}.
 
 -callback handle_gencall_event(Timestamp :: erlang:timestamp(),
                                Entity :: erlwitness:entity(),
@@ -74,6 +78,15 @@
                                 EntityProcName :: term(),
                                 EntityProcState :: term(),
                                 State :: term()) -> handler_return().
+
+-callback handle_lager_event(Timestamp :: erlang:timestamp(),
+                             Entity :: erlwitness:entity(),
+                             EntityPid :: pid(),
+                             EntityProcType :: erlwitness:process_type(),
+                             EntityProcName :: term(),
+                             LagerMFA :: lager_mfa(),
+                             LagerDebugInfo :: lager_debug_info(),
+                             State :: term()) -> handler_return().
 
 
 -define(PROCDIC_WATCHER_MODULE, 'erlwitness/watcher_module').
@@ -135,6 +148,12 @@ unwatch_all() ->
 report_init(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, EntityProcState) ->
     ok = gen_server:cast(Watcher, ?WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType,
                                                    EntityProcName, {init, EntityProcState})).
+
+report_lager_event(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcName,
+                   LagerModule, LagerFunction, LagerArgs, CodeModule, CodeFunction, CodeLine) ->
+    Event = {lager, LagerModule, LagerFunction, LagerArgs, CodeModule, CodeFunction, CodeLine},
+    ok = gen_server:cast(Watcher, ?WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType,
+                                                   EntityProcName, Event)).
 
 
 %%%  -----------------------------------------------------------------
@@ -244,7 +263,12 @@ handle_cast(?WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType, Entit
         {init, EntityProcState} ->
             undefined = put(?PROCDIC_ENTITY_STATE(EntityPid), EntityProcState),
             WatcherModule:handle_newstate_event(Timestamp, Entity, EntityPid, EntityProcType,
-                                                EntityProcName, EntityProcState, State)
+                                                EntityProcName, EntityProcState, State);
+        {lager, LagerModule, LagerFunction, LagerArgs, CodeModule, CodeFunction, CodeLine} ->
+            WatcherModule:handle_lager_event(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName,
+                                             {LagerModule, LagerFunction, LagerArgs},
+                                             {CodeModule, CodeFunction, CodeLine},
+                                             State)
     end;
 
 handle_cast(Msg, State) ->
@@ -313,7 +337,7 @@ dbg_fun(Entity, EntityProcType, Watcher) ->
                     ok = report_dbg_event(Watcher, Timestamp, Entity, self(),
                                           EntityProcType, EntityProcName,
                                           Event),
-                    ok = erlwitness_entity:set(Entity),
+                    ok = erlwitness_entity:set_params(Entity, EntityProcType, EntityProcName),
                     active
             end
     end,

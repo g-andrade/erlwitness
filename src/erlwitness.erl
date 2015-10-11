@@ -84,7 +84,7 @@ finalize_init(#wrapped_init_args{}=WrappedInitArgs, InitResult) ->
     case WrappedInitArgs#wrapped_init_args.watchers of
         [] -> InitResult;
         [_|_]=Watchers ->
-            ok = erlwitness_entity:set(Entity),
+            ok = erlwitness_entity:set_params(Entity, EntityProcType, self()),
             Timestamp = os:timestamp(),
             lists:foreach(
                 fun (Watcher) ->

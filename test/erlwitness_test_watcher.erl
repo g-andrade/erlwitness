@@ -13,6 +13,7 @@
          handle_gencast_event/7,
          handle_geninfo_event/7,
          handle_newstate_event/7,
+         handle_lager_event/8,
          handle_call/3,
          handle_cast/2,
          handle_info/2,
@@ -51,6 +52,10 @@ handle_geninfo_event(Timestamp, Entity, EntityPid, EntityProcType, EntityProcNam
 
 handle_newstate_event(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, EntityProcState, State) ->
     handle_event(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, {new_state, EntityProcState}, State),
+    {noreply, State}.
+
+handle_lager_event(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, LagerMFA, LagerDebugInfo, State) ->
+    handle_event(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, {lager, LagerMFA, LagerDebugInfo}, State),
     {noreply, State}.
 
 
