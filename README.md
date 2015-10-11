@@ -9,6 +9,7 @@ __Version:__ 1.0.0
 __Authors:__ Guilherme Andrade ([`erlwitness(at)gandrade(dot)net`](mailto:erlwitness(at)gandrade(dot)net)).
 
 `erlwitness`: Semantic process groups watchtower.
+
 ---------
 
 
@@ -159,12 +160,12 @@ However, if you already have your own global process directory in place, it's re
 
 
 <table width="100%" border="0" summary="list of modules">
-<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/master/doc/erlwitness.md" class="module">erlwitness</a></td></tr>
-<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/master/doc/erlwitness_app.md" class="module">erlwitness_app</a></td></tr>
-<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/master/doc/erlwitness_conf.md" class="module">erlwitness_conf</a></td></tr>
-<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/master/doc/erlwitness_index_serv.md" class="module">erlwitness_index_serv</a></td></tr>
-<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/master/doc/erlwitness_lobby.md" class="module">erlwitness_lobby</a></td></tr>
-<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/master/doc/erlwitness_lookup.md" class="module">erlwitness_lookup</a></td></tr>
-<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/master/doc/erlwitness_sup.md" class="module">erlwitness_sup</a></td></tr>
-<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/master/doc/erlwitness_watcher.md" class="module">erlwitness_watcher</a></td></tr></table>
+<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/develop/doc/erlwitness.md" class="module">erlwitness</a></td></tr>
+<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/develop/doc/erlwitness_app.md" class="module">erlwitness_app</a></td></tr>
+<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/develop/doc/erlwitness_conf.md" class="module">erlwitness_conf</a></td></tr>
+<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/develop/doc/erlwitness_index_serv.md" class="module">erlwitness_index_serv</a></td></tr>
+<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/develop/doc/erlwitness_lobby.md" class="module">erlwitness_lobby</a></td></tr>
+<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/develop/doc/erlwitness_lookup.md" class="module">erlwitness_lookup</a></td></tr>
+<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/develop/doc/erlwitness_sup.md" class="module">erlwitness_sup</a></td></tr>
+<tr><td><a href="https://github.com/g-andrade/erlwitness/blob/develop/doc/erlwitness_watcher.md" class="module">erlwitness_watcher</a></td></tr></table>
 

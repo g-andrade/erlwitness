@@ -35,7 +35,7 @@ dbg_fun() = fun((FuncState::<a href="#type-dbg_fun_state">dbg_fun_state()</a>, E
 
 
 <pre><code>
-dbg_fun_state() = active | idle
+dbg_fun_state() = active | done
 </code></pre>
 
 
@@ -56,7 +56,7 @@ handler_return() = {noreply, NewState::term()} | {noreply, NewState::term(), tim
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get_entity_dbg_options-3">get_entity_dbg_options/3</a></td><td></td></tr><tr><td valign="top"><a href="#report_init-7">report_init/7</a></td><td></td></tr><tr><td valign="top"><a href="#start-3">start/3</a></td><td></td></tr><tr><td valign="top"><a href="#start-4">start/4</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-3">start_link/3</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-4">start_link/4</a></td><td></td></tr><tr><td valign="top"><a href="#unwatch-1">unwatch/1</a></td><td></td></tr><tr><td valign="top"><a href="#unwatch_all-0">unwatch_all/0</a></td><td></td></tr><tr><td valign="top"><a href="#watch-1">watch/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get_entity_dbg_options-3">get_entity_dbg_options/3</a></td><td></td></tr><tr><td valign="top"><a href="#install_dbg_fun-4">install_dbg_fun/4</a></td><td></td></tr><tr><td valign="top"><a href="#report_init-7">report_init/7</a></td><td></td></tr><tr><td valign="top"><a href="#start-3">start/3</a></td><td></td></tr><tr><td valign="top"><a href="#start-4">start/4</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-3">start_link/3</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-4">start_link/4</a></td><td></td></tr><tr><td valign="top"><a href="#unwatch-1">unwatch/1</a></td><td></td></tr><tr><td valign="top"><a href="#unwatch_all-0">unwatch_all/0</a></td><td></td></tr><tr><td valign="top"><a href="#watch-1">watch/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -70,6 +70,19 @@ handler_return() = {noreply, NewState::term()} | {noreply, NewState::term(), tim
 
 <pre><code>
 get_entity_dbg_options(Entity::<a href="erlwitness.md#type-entity">erlwitness:entity()</a>, EntityProcType::<a href="erlwitness.md#type-process_type">erlwitness:process_type()</a>, Watchers::[pid()]) -&gt; [{install, {<a href="#type-dbg_fun">dbg_fun()</a>, <a href="#type-dbg_fun_state">dbg_fun_state()</a>}}]
+</code></pre>
+
+<br></br>
+
+
+
+<a name="install_dbg_fun-4"></a>
+
+### install_dbg_fun/4 ###
+
+
+<pre><code>
+install_dbg_fun(Entity::<a href="erlwitness.md#type-entity">erlwitness:entity()</a>, EntityProcType::<a href="erlwitness.md#type-process_type">erlwitness:process_type()</a>, EntityPid::pid(), Watcher::pid()) -&gt; any()
 </code></pre>
 
 <br></br>

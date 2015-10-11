@@ -31,21 +31,26 @@
 -type init_result() :: {ok, S::term()} | {ok, S::term(), timeout()} | ignore | {stop, Reason::term()}.
 
 
+%% @doc Wrap arguments and merge erlwitness custom debug options.
+%%
 -spec get_start_extras(Entity :: entity(), EntityProcType :: process_type())
     -> {WrappedInitArgs :: #wrapped_init_args{}, StartOptions :: [term()]}.
 get_start_extras(Entity, EntityProcType) ->
     get_start_extras(Entity, EntityProcType, []).
 
+%% @doc Wrap arguments and merge erlwitness custom debug options.
+%%
 -spec get_start_extras(Entity :: entity(), EntityProcType :: process_type(),
                        Args :: term())
     -> {WrappedInitArgs :: #wrapped_init_args{}, StartOptions :: [term()]}.
 get_start_extras(Entity, EntityProcType, Args) ->
     get_start_extras(Entity, EntityProcType, Args, []).
 
+%% @doc Wrap arguments and merge erlwitness custom debug options.
+%%
 -spec get_start_extras(Entity :: entity(), EntityProcType :: process_type(),
                        Args :: term(), BaseStartOptions :: [term()])
     -> {WrappedInitArgs :: #wrapped_init_args{}, StartOptions :: [term()]}.
-    %DebugOptions :: [{install, {erlwitness_watcher:dbg_fun(), erlwitness_watcher:dbg_fun_state()}}]}.
 get_start_extras(Entity, EntityProcType, Args, BaseStartOptions) ->
     {StartOptions, Watchers} = merge_dbg_options(Entity, EntityProcType, BaseStartOptions),
     WrappedInitArgs = #wrapped_init_args{watchers = Watchers,
@@ -55,10 +60,12 @@ get_start_extras(Entity, EntityProcType, Args, BaseStartOptions) ->
     {WrappedInitArgs, StartOptions}.
 
 
+%% @doc Unwrap previously wrapped args.
 -spec unwrap_init_args(WrappedInitArgs :: #wrapped_init_args{}) -> term().
 unwrap_init_args(#wrapped_init_args{ args=Args }) -> Args.
 
 
+%% @doc Finalize entity's gen_server initialization
 -spec finalize_init(#wrapped_init_args{}, InitResult :: init_result()) -> init_result().
 finalize_init(#wrapped_init_args{}, ignore) ->
     ignore;
