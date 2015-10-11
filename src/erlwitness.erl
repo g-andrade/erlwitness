@@ -5,11 +5,15 @@
          get_starting_extras/4,
          unwrap_init_args/1,
          finalize_init/2
-         %index_entity/3
         ]).
+
 -export_type([entity/0, process_type/0, wrapped_init_args/0]).
 
--ignore_xref([{get_entity_dbg_options, 2}, {index_entity, 3}]).
+-ignore_xref([{get_starting_extras, 2},
+              {get_starting_extras, 3},
+              {get_starting_extras, 4},
+              {unwrap_init_args, 1},
+              {finalize_init, 2}]).
 
 -type entity() :: any().
 -type process_type() :: any().

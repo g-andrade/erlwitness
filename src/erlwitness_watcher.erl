@@ -7,7 +7,6 @@
          start_link/4,
          start/3,
          start/4,
-         get_entity_dbg_options/2,
          get_entity_dbg_options/3,
          watch/1,
          unwatch/1,
@@ -87,12 +86,6 @@
 %%%===================================================================
 %%% API functions
 %%%===================================================================
--spec get_entity_dbg_options(Entity :: erlwitness:entity(), EntityProcType :: erlwitness:process_type())
-    -> [{install, {dbg_fun(), dbg_fun_state()}}].
-get_entity_dbg_options(Entity, EntityProcType) ->
-    Watchers = erlwitness_lobby:watchers_local_lookup(Entity),
-    get_entity_dbg_options(Entity, EntityProcType, Watchers).
-
 -spec get_entity_dbg_options(Entity :: erlwitness:entity(), EntityProcType :: erlwitness:process_type(),
                              Watchers :: [pid()])
     -> [{install, {dbg_fun(), dbg_fun_state()}}].
@@ -137,17 +130,17 @@ report_init(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcNam
 %% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
-start_link(Entity, WatcherModule, WatcherArgs) ->
-    gen_server:start_link(?MODULE, [Entity, WatcherModule, WatcherArgs], []).
+start_link(Entities, WatcherModule, WatcherArgs) when is_list(Entities) ->
+    gen_server:start_link(?MODULE, [Entities, WatcherModule, WatcherArgs], []).
 
-start_link(Name, Entity, WatcherModule, WatcherArgs) ->
-    gen_server:start_link(Name, ?MODULE, [Entity, WatcherModule, WatcherArgs], []).
+start_link(Name, Entities, WatcherModule, WatcherArgs) when is_list(Entities) ->
+    gen_server:start_link(Name, ?MODULE, [Entities, WatcherModule, WatcherArgs], []).
 
-start(Entity, WatcherModule, WatcherArgs) ->
-    gen_server:start(?MODULE, [Entity, WatcherModule, WatcherArgs], []).
+start(Entities, WatcherModule, WatcherArgs) when is_list(Entities) ->
+    gen_server:start(?MODULE, [Entities, WatcherModule, WatcherArgs], []).
 
-start(Name, Entity, WatcherModule, WatcherArgs) ->
-    gen_server:start(Name, ?MODULE, [Entity, WatcherModule, WatcherArgs], []).
+start(Name, Entities, WatcherModule, WatcherArgs) when is_list(Entities) ->
+    gen_server:start(Name, ?MODULE, [Entities, WatcherModule, WatcherArgs], []).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -164,9 +157,9 @@ start(Name, Entity, WatcherModule, WatcherArgs) ->
 %%                     {stop, Reason}
 %% @end
 %%--------------------------------------------------------------------
-init([Entity, WatcherModule, WatcherArgs]) ->
+init([Entities, WatcherModule, WatcherArgs]) ->
     undefined = put(?PROCDIC_WATCHER_MODULE, WatcherModule),
-    gen_server:cast(self(), {watch, Entity}),
+    gen_server:cast(self(), {watch, Entities}),
     WatcherModule:init(WatcherArgs).
 
 %%--------------------------------------------------------------------
@@ -196,8 +189,8 @@ handle_call(Request, From, State) ->
 %%                                  {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_cast({watch, Entity}, State) ->
-    ok = watch(Entity),
+handle_cast({watch, Entities}, State) ->
+    lists:foreach(fun (Entity) -> ok = watch(Entity) end, Entities),
     {noreply, State};
 
 handle_cast(?WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, Event), State) ->

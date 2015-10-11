@@ -46,14 +46,14 @@ watch(Entity, WatcherPid) when is_pid(WatcherPid) ->
     length(Replies) > 0.
 
 -spec unwatch(Entity :: erlwitness:entity(), WatcherPid :: pid()) -> ok.
-unwatch(Entity, WatcherPid) ->
+unwatch(Entity, WatcherPid) when is_pid(WatcherPid) ->
     Watcher = #watcher{entity = Entity,
                        watcher_pid = WatcherPid},
     abcast = gen_server:abcast(?SERVER, {unwatch, Watcher}),
     ok.
 
 -spec unwatch_by_pid(WatcherPid :: pid()) -> ok.
-unwatch_by_pid(WatcherPid) ->
+unwatch_by_pid(WatcherPid) when is_pid(WatcherPid) ->
     abcast = gen_server:abcast(?SERVER, {unwatch_pid, WatcherPid}),
     ok.
 
@@ -135,7 +135,7 @@ handle_cast({watch, #watcher{ watcher_pid=Pid }=Watcher}, State)
         when is_pid(Pid), Pid /= self() ->
     {noreply, handle_registration(State, Watcher)};
 
-handle_cast({unwatch, #watcher{ watcher_pid=Pid }}=Watcher, State) when is_pid(Pid) ->
+handle_cast({unwatch, #watcher{ watcher_pid=Pid }=Watcher}, State) when is_pid(Pid) ->
     true = ets:delete_object(?TABLE, Watcher),
     case ets:match(?TABLE, #watcher{ entity='$1', watcher_pid=Pid }) of
         [_|_] -> {noreply, State};
@@ -160,7 +160,7 @@ handle_cast(_Msg, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_info({nodeup, Node, _}, #state{}=State) ->
+handle_info({nodeup, Node, _}, #state{}=State) when Node /= node() ->
     MatchSpec = ets:fun2ms(fun(#watcher{ watcher_pid=Pid }=Watcher) when node(Pid) == node() -> Watcher end),
     LocalWatchers = ets:select(?TABLE, MatchSpec),
     lists:foreach(fun (#watcher{}=Watcher) -> gen_server:cast({?SERVER, Node}, {watch, Watcher}) end,
