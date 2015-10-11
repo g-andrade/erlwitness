@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module erlwitness_watcher</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module erlwitness_watcher</h1>
+<ul class="index"><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+
+<p><b>Behaviours:</b> <a href="gen_server.html"><tt>gen_server</tt></a>.</p>
+<p><b>This module defines the <tt>erlwitness_watcher</tt> behaviour.</b><br> Required callback functions: <tt>handle_gencall_event/8</tt>, <tt>handle_gencast_event/7</tt>, <tt>handle_geninfo_event/7</tt>, <tt>handle_newstate_event/7</tt>.</p>
+
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-dbg_fun">dbg_fun()</a></h3>
+<p><tt>dbg_fun() = fun((FuncState::<a href="#type-dbg_fun_state">dbg_fun_state()</a>, Event::any(), ProcName::any()) -&gt; NewFuncState::<a href="#type-dbg_fun_state">dbg_fun_state()</a>)</tt></p>
+
+
+<h3 class="typedecl"><a name="type-dbg_fun_state">dbg_fun_state()</a></h3>
+<p><tt>dbg_fun_state() = active | idle</tt></p>
+
+
+<h3 class="typedecl"><a name="type-handler_return">handler_return()</a></h3>
+<p><tt>handler_return() = {noreply, NewState::term()} | {noreply, NewState::term(), timeout() | hibernate} | {stop, Reason::term(), NewState::term()}</tt></p>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get_entity_dbg_options-3">get_entity_dbg_options/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#report_init-7">report_init/7</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start-3">start/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start-4">start/4</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start_link-3">start_link/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start_link-4">start_link/4</a></td><td></td></tr>
+<tr><td valign="top"><a href="#unwatch-1">unwatch/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#unwatch_all-0">unwatch_all/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#watch-1">watch/1</a></td><td></td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="get_entity_dbg_options-3">get_entity_dbg_options/3</a></h3>
+<div class="spec">
+<p><tt>get_entity_dbg_options(Entity::<a href="erlwitness.html#type-entity">erlwitness:entity()</a>, EntityProcType::<a href="erlwitness.html#type-process_type">erlwitness:process_type()</a>, Watchers::[pid()]) -&gt; [{install, {<a href="#type-dbg_fun">dbg_fun()</a>, <a href="#type-dbg_fun_state">dbg_fun_state()</a>}}]</tt><br></p>
+</div>
+
+<h3 class="function"><a name="report_init-7">report_init/7</a></h3>
+<div class="spec">
+<p><tt>report_init(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, EntityProcState) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="start-3">start/3</a></h3>
+<div class="spec">
+<p><tt>start(Entities, WatcherModule, WatcherArgs) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="start-4">start/4</a></h3>
+<div class="spec">
+<p><tt>start(Name, Entities, WatcherModule, WatcherArgs) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="start_link-3">start_link/3</a></h3>
+<div class="spec">
+<p><tt>start_link(Entities, WatcherModule, WatcherArgs) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="start_link-4">start_link/4</a></h3>
+<div class="spec">
+<p><tt>start_link(Name, Entities, WatcherModule, WatcherArgs) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="unwatch-1">unwatch/1</a></h3>
+<div class="spec">
+<p><tt>unwatch(Entity::<a href="erlwitness.html#type-entity">erlwitness:entity()</a>) -&gt; ok</tt><br></p>
+</div>
+
+<h3 class="function"><a name="unwatch_all-0">unwatch_all/0</a></h3>
+<div class="spec">
+<p><tt>unwatch_all() -&gt; ok</tt><br></p>
+</div>
+
+<h3 class="function"><a name="watch-1">watch/1</a></h3>
+<div class="spec">
+<p><tt>watch(Entity::<a href="erlwitness.html#type-entity">erlwitness:entity()</a>) -&gt; ok</tt><br></p>
+</div>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc, Oct 11 2015, 03:54:15.</i></p>
+</body>
+</html>
