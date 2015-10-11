@@ -8,8 +8,8 @@
 
 -spec get_lookup_module() -> module().
 get_lookup_module() ->
-    {ok, V} = application:get_env(erlwitness, entity_lookup_module),
-    V.
+    application:get_env(erlwitness, entity_lookup_module,
+                        erlwitness_index_serv).
 
 -spec use_internal_indexing() -> boolean().
 use_internal_indexing() ->
