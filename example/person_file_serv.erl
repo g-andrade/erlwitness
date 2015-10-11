@@ -1,5 +1,5 @@
 % vim: set expandtab softtabstop=4 shiftwidth=4:
--module(erlwitness_test_entity).
+-module(person_file_serv).
 -author('Guilherme Andrade <erlwitness(at)(dot)net>').
 
 -behaviour(gen_server).
@@ -21,12 +21,12 @@
 
 
 start_link(Person, Files, LuckyNumber) ->
-    {WrappedArgs, StartOptions} = erlwitness:get_start_extras(Person, person_file_serv,
+    {WrappedArgs, StartOptions} = erlwitness:get_start_extras({person, Person}, person_file_serv,
                                                               [Files, LuckyNumber]),
     gen_server:start_link(?MODULE, WrappedArgs, StartOptions).
 
 start(Person, Files, LuckyNumber) ->
-    {WrappedArgs, StartOptions} = erlwitness:get_start_extras(Person, person_file_serv,
+    {WrappedArgs, StartOptions} = erlwitness:get_start_extras({person, Person}, person_file_serv,
                                                               [Files, LuckyNumber]),
     gen_server:start(?MODULE, WrappedArgs, StartOptions).
 
