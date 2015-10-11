@@ -13,6 +13,7 @@
          handle_gencast_event/7,
          handle_geninfo_event/7,
          handle_newstate_event/7,
+         handle_lager_event/8,
          handle_call/3,
          handle_cast/2,
          handle_info/2,
@@ -50,6 +51,13 @@ handle_geninfo_event(Timestamp, {person, Person}, PersonPid, person_file_serv=Pe
 
 handle_newstate_event(Timestamp, {person, Person}, PersonPid, person_file_serv=PersonProcType, PersonProcName, PersonProcState, #state{}=State) ->
     handle_event(Timestamp, {person, Person}, PersonPid, PersonProcType, PersonProcName, {new_state, PersonProcState}, State),
+    {noreply, State}.
+
+handle_lager_event(Timestamp, {person, Person}, EntityPid, EntityProcType, EntityProcName,
+                   {lager=_LagerModule, debug=_LagerFunction, _LagerArguments}=LagerMFA,
+                   {person_file_serv=_CodeModule, handle_cast=_CodeFunction, _CodeLine}=LagerDebugInfo,
+                   #state{}=State) ->
+    handle_event(Timestamp, {person, Person}, EntityPid, EntityProcType, EntityProcName, {lager, LagerMFA, LagerDebugInfo}, State),
     {noreply, State}.
 
 

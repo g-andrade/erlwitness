@@ -9,7 +9,7 @@ __Behaviours:__ [`gen_server`](gen_server.md).
 
 __This module defines the `erlwitness_watcher` behaviour.__
 <br></br>
- Required callback functions: `handle_gencall_event/8`, `handle_gencast_event/7`, `handle_geninfo_event/7`, `handle_newstate_event/7`.
+ Required callback functions: `handle_gencall_event/8`, `handle_gencast_event/7`, `handle_geninfo_event/7`, `handle_newstate_event/7`, `handle_lager_event/8`.
 
 <a name="types"></a>
 
@@ -56,7 +56,7 @@ handler_return() = {noreply, NewState::term()} | {noreply, NewState::term(), tim
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get_entity_dbg_options-3">get_entity_dbg_options/3</a></td><td></td></tr><tr><td valign="top"><a href="#install_dbg_fun-4">install_dbg_fun/4</a></td><td></td></tr><tr><td valign="top"><a href="#report_init-7">report_init/7</a></td><td></td></tr><tr><td valign="top"><a href="#start-3">start/3</a></td><td></td></tr><tr><td valign="top"><a href="#start-4">start/4</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-3">start_link/3</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-4">start_link/4</a></td><td></td></tr><tr><td valign="top"><a href="#unwatch-1">unwatch/1</a></td><td></td></tr><tr><td valign="top"><a href="#unwatch_all-0">unwatch_all/0</a></td><td></td></tr><tr><td valign="top"><a href="#watch-1">watch/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get_entity_dbg_options-3">get_entity_dbg_options/3</a></td><td></td></tr><tr><td valign="top"><a href="#install_dbg_fun-4">install_dbg_fun/4</a></td><td></td></tr><tr><td valign="top"><a href="#report_init-7">report_init/7</a></td><td></td></tr><tr><td valign="top"><a href="#report_lager_event-12">report_lager_event/12</a></td><td></td></tr><tr><td valign="top"><a href="#start-3">start/3</a></td><td></td></tr><tr><td valign="top"><a href="#start-4">start/4</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-3">start_link/3</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-4">start_link/4</a></td><td></td></tr><tr><td valign="top"><a href="#unwatch-1">unwatch/1</a></td><td></td></tr><tr><td valign="top"><a href="#unwatch_all-0">unwatch_all/0</a></td><td></td></tr><tr><td valign="top"><a href="#watch-1">watch/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -94,6 +94,13 @@ install_dbg_fun(Entity::<a href="erlwitness.md#type-entity">erlwitness:entity()<
 ### report_init/7 ###
 
 `report_init(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, EntityProcState) -> any()`
+
+
+<a name="report_lager_event-12"></a>
+
+### report_lager_event/12 ###
+
+`report_lager_event(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, LagerModule, LagerFunction, LagerArgs, CodeModule, CodeFunction, CodeLine) -> any()`
 
 
 <a name="start-3"></a>

@@ -10,13 +10,26 @@ __Behaviours:__ [`gen_server`](gen_server.md).
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#is_entity_watched_by-2">is_entity_watched_by/2</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#is_entity_watched-1">is_entity_watched/1</a></td><td></td></tr><tr><td valign="top"><a href="#is_entity_watched_by-2">is_entity_watched_by/2</a></td><td></td></tr><tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td>
 Starts the server.</td></tr><tr><td valign="top"><a href="#unwatch-2">unwatch/2</a></td><td></td></tr><tr><td valign="top"><a href="#unwatch_by_pid-1">unwatch_by_pid/1</a></td><td></td></tr><tr><td valign="top"><a href="#watch-2">watch/2</a></td><td></td></tr><tr><td valign="top"><a href="#watchers_local_lookup-1">watchers_local_lookup/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
+
+<a name="is_entity_watched-1"></a>
+
+### is_entity_watched/1 ###
+
+
+<pre><code>
+is_entity_watched(Entity::<a href="erlwitness.md#type-entity">erlwitness:entity()</a>) -&gt; boolean()
+</code></pre>
+
+<br></br>
+
+
 
 <a name="is_entity_watched_by-2"></a>
 

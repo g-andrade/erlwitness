@@ -2,6 +2,9 @@
 -module(person_file_serv).
 -author('Guilherme Andrade <erlwitness(at)gandrade(dot)net>').
 
+-compile([{parse_transform, erlwitness_transform}]).
+-compile([{parse_transform, lager_transform}]).
+
 -behaviour(gen_server).
 
 -export([start_link/3,
@@ -40,8 +43,14 @@ init(WrappedArgs) ->
 handle_call(_Request, _From, State) ->
     {noreply, State}.
 
+
+handle_cast(log_something, State) ->
+    lager:debug("this is a message"),
+    {noreply, State};
+
 handle_cast(_Msg, State) ->
     {noreply, State}.
+
 
 handle_info(_Info, State) ->
     {noreply, State}.

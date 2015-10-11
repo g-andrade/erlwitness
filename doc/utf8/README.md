@@ -15,7 +15,7 @@ __Authors:__ Guilherme Andrade ([`erlwitness(at)gandrade(dot)net`](mailto:erlwit
 ### <a name="What_does_it_do?">What does it do?</a> ###
 
 
-`erlwitness` allows one to funnel `gen_server` events (init, calls, casts, infos, state changes) specific to identified entities into arbitrary watcher processes.
+`erlwitness` allows one to funnel both `gen_server` events (init, calls, casts, infos, state changes) and `lager` calls specific to identified entities into arbitrary watcher processes.
 
 
 ### <a name="Why?">Why?</a> ###
@@ -32,6 +32,7 @@ For example: remote activity tracers for sizeable software development teams (in
 - An entity can consist of zero or more processes that come and go;
 - Watching works transparently on both local and remote nodes;
 - Watching can be initiated both before and after entity processes have been spawned.
+- Lager calls are (optionally) watchable through a parse_transform.
 
 
 ### <a name="How_do_I_use_it?">How do I use it?</a> ###
@@ -46,9 +47,11 @@ There are two main parts to an ordinary setup:
 % ....
 -behaviour(gen_server).
 % ...
+%% Uncomment to allow for lager tracing
+%-compile([{parse_transform, erlwitness_transform}]).
 
 start_link(Person, Files, LuckyNumber) ->
-    {WrappedArgs, StartOptions} = erlwitness:get_start_extras({person, Person}, 
+    {WrappedArgs, StartOptions} = erlwitness:get_start_extras({person, Person},
                                                               person_file_serv,
                                                               [Files, LuckyNumber]),
     gen_server:start_link(?MODULE, WrappedArgs, StartOptions).
@@ -99,6 +102,16 @@ handle_newstate_event(Timestamp, {person, Person}, PersonPid, PersonProcType,
     io:format("Here's a new state: ~p~n", [{Timestamp, Person, PersonPid,
                                             PersonProcType, PersonState}]),
     {noreply, State}.
+
+handle_lager_event(Timestamp, {person, Person}, PersonPid, PersonProcType,
+                   PersonProcName, LagerMFA, LagerDebugInfo, State) ->
+    {_LagerModule, LagerLevel, LagerArgs} = LagerMFA,
+    {CodeModule, CodeFunction, CodeLine} = LagerDebugInfo,
+    io:format("Here's a lager message from ~p: ~p @ ~p~n",
+             [{Timestamp, Person, PersonPid, PersonProcType, PersonState},
+              {LagerLevel, LagerArgs}, {CodeModule, CodeFunction, CodeLine}]),
+    {noreply, State}.
+
 % ..
 
 ```
@@ -130,12 +143,23 @@ app.config:
 
 [{erlwitness, [
             % Optional; module implementing 'erlwitness_lookup' behaviour
-            %{entity_lookup_module, erlwitness_index_serv}, 
+            %{entity_lookup_module, erlwitness_index_serv},
             %
             % Optional; defaults to 10 * NumberOfSchedulers
-            %{erlwitness_index_serv_count, N :: pos_integer()} 
+            %{erlwitness_index_serv_count, N :: pos_integer()}
             ]}
     ].
+
+```
+
+
+### <a name="How_do_I_globally_enable_the_lager_events_parse_transform?">How do I globally enable the lager events parse_transform?</a> ###
+
+Compiler flags:
+
+```erlang
+
+{parse_transform, erlwitness_transform}
 
 ```
 
@@ -145,8 +169,8 @@ app.config:
 
 This software is built on the premise that watchers are few, rare, and mostly limited
 to development environments; therefore watching is heavy and privacy is light.
-- Unwatched processes: basic ETS lookup just before the process starts;
-- Watched processes: one OTP debug fun per watcher (see [sys(3)](http://www.erlang.org/doc/man/sys.html)).
+- Unwatched processes: basic ETS lookup just before the process starts + a single process dictionary check for every `lager` call;
+- Watched processes: one OTP debug fun per watcher (see [sys(3)](http://www.erlang.org/doc/man/sys.html)) + `lager` calls redirection.
 
 
 ### <a name="Why_are_there_no_termination_events?">Why are there no termination events?</a> ###
@@ -170,7 +194,7 @@ However, if you already have your own global process directory in place, it's re
 
 ### <a name="Future_plans">Future plans</a> ###
 
-- Some sort of lager /error\_logger per-entity sink;
+- Clean up the current lager events mess;
 - Offline watcher scheduling with later history retrieving.
 
 
@@ -181,9 +205,11 @@ However, if you already have your own global process directory in place, it's re
 <tr><td><a href="erlwitness.md" class="module">erlwitness</a></td></tr>
 <tr><td><a href="erlwitness_app.md" class="module">erlwitness_app</a></td></tr>
 <tr><td><a href="erlwitness_conf.md" class="module">erlwitness_conf</a></td></tr>
+<tr><td><a href="erlwitness_entity.md" class="module">erlwitness_entity</a></td></tr>
 <tr><td><a href="erlwitness_index_serv.md" class="module">erlwitness_index_serv</a></td></tr>
 <tr><td><a href="erlwitness_lobby.md" class="module">erlwitness_lobby</a></td></tr>
 <tr><td><a href="erlwitness_lookup.md" class="module">erlwitness_lookup</a></td></tr>
 <tr><td><a href="erlwitness_sup.md" class="module">erlwitness_sup</a></td></tr>
+<tr><td><a href="erlwitness_transform.md" class="module">erlwitness_transform</a></td></tr>
 <tr><td><a href="erlwitness_watcher.md" class="module">erlwitness_watcher</a></td></tr></table>
 

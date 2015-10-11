@@ -1,5 +1,5 @@
 %% encoding: UTF-8
 {packages,[]}.
-{modules,[erlwitness,erlwitness_app,erlwitness_conf,erlwitness_index_serv,
-          erlwitness_lobby,erlwitness_lookup,erlwitness_sup,
-          erlwitness_watcher]}.
+{modules,[erlwitness,erlwitness_app,erlwitness_conf,erlwitness_entity,
+          erlwitness_index_serv,erlwitness_lobby,erlwitness_lookup,
+          erlwitness_sup,erlwitness_transform,erlwitness_watcher]}.

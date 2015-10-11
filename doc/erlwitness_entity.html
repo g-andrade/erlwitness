@@ -2,33 +2,38 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Module erlwitness_sup</title>
+<title>Module erlwitness_entity</title>
 <link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
 </head>
 <body bgcolor="white">
 <div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
 <hr>
 
-<h1>Module erlwitness_sup</h1>
+<h1>Module erlwitness_entity</h1>
 <ul class="index"><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
 
-<p><b>Behaviours:</b> <a href="supervisor.html"><tt>supervisor</tt></a>.</p>
 
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr>
-<tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td></td></tr>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#get_entity-0">get_entity/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#report_lager_event-8">report_lager_event/8</a></td><td></td></tr>
+<tr><td valign="top"><a href="#set_params-3">set_params/3</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
 
-<h3 class="function"><a name="init-1">init/1</a></h3>
+<h3 class="function"><a name="get_entity-0">get_entity/0</a></h3>
 <div class="spec">
-<p><tt>init(X1) -&gt; any()</tt></p>
+<p><tt>get_entity() -&gt; {value, <a href="erlwitness.html#type-entity">erlwitness:entity()</a>} | undefined</tt><br></p>
 </div>
 
-<h3 class="function"><a name="start_link-0">start_link/0</a></h3>
+<h3 class="function"><a name="report_lager_event-8">report_lager_event/8</a></h3>
 <div class="spec">
-<p><tt>start_link() -&gt; any()</tt></p>
+<p><tt>report_lager_event(Watchers::[pid()], Entity::<a href="erlwitness.html#type-entity">erlwitness:entity()</a>, LagerModule::module(), LagerFunction::atom(), LagerArgs::list(), CodeModule::module(), CodeFunction::atom(), CodeLine::pos_integer()) -&gt; ok</tt><br></p>
+</div>
+
+<h3 class="function"><a name="set_params-3">set_params/3</a></h3>
+<div class="spec">
+<p><tt>set_params(Entity::<a href="erlwitness.html#type-entity">erlwitness:entity()</a>, EntityProcType::<a href="erlwitness.html#type-process_type">erlwitness:process_type()</a>, EntityProcName::term()) -&gt; ok</tt><br></p>
 </div>
 <hr>
 
