@@ -1,5 +1,7 @@
 % vim: set expandtab softtabstop=4 shiftwidth=4:
 -module(erlwitness_watcher).
+-author('Guilherme Andrade <erlwitness(at)(dot)net>').
+
 -behaviour(gen_server).
 
 %% API functions
@@ -123,13 +125,19 @@ report_init(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityProcNam
                                                    EntityProcName, {init, EntityProcState})).
 
 
-%%--------------------------------------------------------------------
-%% @doc
-%% Starts the server
-%%
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
-%% @end
-%%--------------------------------------------------------------------
+%%%  -----------------------------------------------------------------
+%%% Starts an watcher server.
+%%% start(Entity, WatcherMod, WatcherArgs)
+%%% start(Name, Entity, WatcherMod, WatcherArgs)
+%%% start_link(Entity, WatcherMod, WatcherArgs)
+%%% start_link(Name, Entity, WatcherMod, WatcherArgs) where:
+%%%    Name ::= {local, atom()} | {global, atom()} | {via, atom(), term()}
+%%%    WatcherMod  ::= atom(), callback module implementing the 'real' watcher server
+%%%    WatcherArgs ::= term(), init arguments (to Mod:init/1)
+%%% Returns: {ok, Pid} |
+%%%          {error, {already_started, Pid}} |
+%%%          {error, Reason}
+%%% -----------------------------------------------------------------
 start_link(Entities, WatcherModule, WatcherArgs) when is_list(Entities) ->
     gen_server:start_link(?MODULE, [Entities, WatcherModule, WatcherArgs], []).
 

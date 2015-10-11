@@ -1,0 +1,48 @@
+@author Guilherme Andrade <erlwitness(at)gandrade(dot)net>
+@copyright 2015 Guilherme Andrade
+@version 1.0.0
+@title erlwitness
+@doc `erlwitness': On-demand semantic process group watchtower 
+
+<hr/>
+
+== What does it do? ==
+`erlwitness' allows one to conveniently funnel `gen_server' events (init, calls, casts, info, state changes) specific to one or more entities (user_id, person_name, whatever you want to use) into arbitrary watcher processes.
+
+== How do I use it? ==
+There are two main parts to an ordinary setup:
+
+1) Adapt your existing gen_server:start / gen_server:start_link calls to make use of the relevant registration;
+
+<pre lang="erlang">
+% ....
+start_link(Person, Files, LuckyNumber) ->
+    {WrappedArgs, StartOptions} = erlwitness:get_start_extras(Person, person_file_serv,
+                                                              [Files, LuckyNumber]),
+    gen_server:start_link(?MODULE, WrappedArgs, StartOptions).
+
+init(WrappedArgs) ->
+    [Files, LuckyNumber] = erlwitness:unwrap_init_args(WrappedArgs),
+    InitResult = {ok, #state{files = Files,
+                             lucky_number = LuckyNumber}},
+    erlwitness:finalize_init(WrappedArgs, InitResult).
+% ....
+</pre>
+
+2) Code your own watcher process which will implement both `gen_server' and `erlwitness_watcher' behaviours.
+
+<pre lang="erlang">
+% ...
+start_link(Person) ->
+    erlwitness_watcher:start_link([Person], ?MODULE, []).
+
+% ...
+
+handle_gencall_event(Timestamp, Entity, EntityPid, EntityProcType, 
+                     EntityProcName, Call, From, State) ->
+    io:format("I watch everything: ~p~n", [{Timestamp, Entity, EntityPid, 
+                                            EntityProcType, Call, From}]),
+    {noreply, State}.
+
+% ..etc.
+</pre>

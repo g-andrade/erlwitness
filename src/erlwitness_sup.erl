@@ -1,5 +1,6 @@
 % vim: set expandtab softtabstop=4 shiftwidth=4:
 -module(erlwitness_sup).
+-author('Guilherme Andrade <erlwitness(at)(dot)net>').
 
 -behaviour(supervisor).
 

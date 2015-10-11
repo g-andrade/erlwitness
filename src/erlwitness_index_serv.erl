@@ -1,5 +1,6 @@
 % vim: set expandtab softtabstop=4 shiftwidth=4:
 -module(erlwitness_index_serv).
+-author('Guilherme Andrade <erlwitness(at)(dot)net>').
 
 -behaviour(gen_server).
 -behaviour(erlwitness_lookup).
@@ -58,7 +59,7 @@ register_entity(Entity, EntityProcType, EntityPid) when is_pid(EntityPid), node(
 %% @doc
 %% Starts the server
 %%
-%% @spec start_link() -> {ok, Pid} | ignore | {error, Error}
+%% @spec start_link(Id :: pos_integer()) -> {ok, Pid} | ignore | {error, Error}
 %% @end
 %%--------------------------------------------------------------------
 start_link(Id) ->
