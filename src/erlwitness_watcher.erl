@@ -313,6 +313,7 @@ dbg_fun(Entity, EntityProcType, Watcher) ->
                     ok = report_dbg_event(Watcher, Timestamp, Entity, self(),
                                           EntityProcType, EntityProcName,
                                           Event),
+                    ok = erlwitness_entity:set(Entity),
                     active
             end
     end,

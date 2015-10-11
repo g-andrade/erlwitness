@@ -1,8 +1,10 @@
 % vim: set expandtab softtabstop=4 shiftwidth=4:
 -module(erlwitness_test_entity).
 -author('Guilherme Andrade <erlwitness(at)gandrade(dot)net>').
-
 -behaviour(gen_server).
+
+-compile([{parse_transform, erlwitness_transform}]).
+-compile([{parse_transform, lager_transform}]).
 
 -export([start_link/2,
          start/2]).
@@ -41,6 +43,10 @@ handle_call(_Request, _From, State) ->
 
 handle_cast(change_state, State) ->
     {noreply, State#state{ value=os:timestamp() }};
+
+handle_cast({log_message, Message}, State) when is_list(Message) ->
+    lager:debug("~p", Message),
+    {noreply, State};
 
 handle_cast(_Msg, State) ->
     {noreply, State}.

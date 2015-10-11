@@ -11,11 +11,9 @@ erlwitness_test_() ->
                 {ok, _} = application:ensure_all_started(erlwitness)
         end,
      fun(_) ->
-                %case whereis(pooldude_test) of
-                %    undefined -> ok;
-                %    Pid -> pool_call(Pid, stop)
-                %end,
                 ok = application:stop(erlwitness),
+                ok = application:stop(lager),
+                ok = application:stop(goldrush),
                 error_logger:tty(true)
         end,
      [{<<"Watcher before entity">>, fun watcher_before_entity/0},

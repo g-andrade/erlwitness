@@ -9,7 +9,8 @@
          unwatch/2,
          unwatch_by_pid/1,
          watchers_local_lookup/1,
-         is_entity_watched_by/2]).
+         is_entity_watched_by/2,
+         is_entity_watched/1]).
 
 -export([start_link/0]).
 
@@ -21,7 +22,8 @@
          terminate/2,
          code_change/3]).
 
--ignore_xref([{start_link, 0}]).
+-ignore_xref([{start_link, 0},
+              {is_entity_watched, 1}]).
 
 
 -record(state, {
@@ -68,6 +70,10 @@ watchers_local_lookup(Entity) ->
 is_entity_watched_by(Entity, WatcherPid) ->
     lists:member(#watcher{entity = Entity, watcher_pid=WatcherPid},
                  ets:lookup(?TABLE, Entity)).
+
+-spec is_entity_watched(Entity :: erlwitness:entity()) -> boolean().
+is_entity_watched(Entity) ->
+    ets:member(?TABLE, Entity).
 
 
 %%--------------------------------------------------------------------

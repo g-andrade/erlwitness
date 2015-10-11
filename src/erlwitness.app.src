@@ -6,7 +6,8 @@
         {registered, []},
         {applications, [
                 kernel,
-                stdlib
+                stdlib,
+                lager
                 ]},
         {mod, { erlwitness_app, []}},
         {env, [
