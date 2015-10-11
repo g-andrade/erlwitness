@@ -7,7 +7,7 @@
          finalize_init/2
         ]).
 
--export_type([entity/0, process_type/0, wrapped_init_args/0]).
+-export_type([entity/0, process_type/0, wrapped_init_args/0, init_result/0]).
 
 -ignore_xref([{get_starting_extras, 2},
               {get_starting_extras, 3},
@@ -17,7 +17,6 @@
 
 -type entity() :: any().
 -type process_type() :: any().
--type init_result() :: {ok, S::term()} | {ok, S::term(), timeout()} | ignore | {stop, Reason::term()}.
 
 -record(wrapped_init_args, {
         watchers :: [pid()],
@@ -27,6 +26,7 @@
 }).
 
 -opaque wrapped_init_args() :: #wrapped_init_args{}.
+-type init_result() :: {ok, S::term()} | {ok, S::term(), timeout()} | ignore | {stop, Reason::term()}.
 
 
 -spec get_starting_extras(Entity :: entity(), EntityProcType :: process_type())
@@ -84,6 +84,7 @@ finalize_init(#wrapped_init_args{}=WrappedInitArgs, InitResult) ->
     end.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -spec index_entity(Entity :: entity(), EntityProcType :: process_type(), EntityPid :: pid())
         -> ok | {error, not_using_internal_indexing}.
 index_entity(Entity, EntityProcType, EntityPid) ->
