@@ -38,7 +38,7 @@ walk_body(Acc, [H|T]) ->
     walk_body([transform_statement(H)|Acc], T).
 
 transform_statement({call, Line, {remote, _Line1, {atom, _Line2, lager=Module},
-                                  {atom, _Line3, Function}}, Arguments0} = Stmt) 
+                                  {atom, _Line3, Function}}, Arguments0} = Stmt)
 ->
     case (lists:member(Function, ?LEVELS) orelse lists:keymember(Function, 1, ?LEVELS_UNSAFE)) of
         true ->
@@ -58,6 +58,19 @@ do_transform(Line, LagerModule, LagerFunction, LagerArguments) ->
     % Let's make sure we don't end up exporting any conflicting case variables
     EntityVar = list_to_atom("ErlWitness_LagerWrapper_SelfEntity_" ++ integer_to_list(Line)),
     WatchersVar = list_to_atom("ErlWitness_LagerWrapper_Watchers_" ++ integer_to_list(Line)),
+
+    %% case erlwitness_entity:get_entity() of
+    %%  undefined -> ok;
+    %%  {value, Entity} ->
+    %%      case erlwitness_lobby:watchers_local_lookup(Entity) of
+    %%          [] -> ok;
+    %%          [_|_]=Watchers ->
+    %%              erlwitness_entity:report_lager_event(
+    %%                  Watchers, Entity,
+    %%                  $LAGER_MODULE, $LAGER_FUNCTION, $LAGER_ARGUMENTS$,
+    %%                  $MODULE, $FUNCTION, $LINE)
+    %%      end
+    %% end
 
     {'case',Line,
      {call,Line,
@@ -98,5 +111,4 @@ blockify_stmts(Line, Stmts) ->
 
 tailify_list(Line, []) -> {nil, Line};
 tailify_list(Line, [H|T]) ->
-    %{cons,1,{string,1,"nheeeeee"},{nil,1}}
     {cons, Line, H, tailify_list(Line, T)}.
