@@ -122,6 +122,25 @@ lookup_global_entity({person, Person}) ->
 Full implementations under _example/_.
 
 
+### <a name="How_do_I_configure_it?">How do I configure it?</a> ###
+
+
+app.config:
+
+```erlang
+
+[{erlwitness, [
+            % Optional; module implementing 'erlwitness_lookup' behaviour
+            %{entity_lookup_module, erlwitness_index_serv}, 
+            %
+            % Optional; defaults to 10 * NumberOfSchedulers
+            %{erlwitness_index_serv_count, N :: pos_integer()} 
+            ]}
+    ].
+
+```
+
+
 ### <a name="What_about_the_overhead?">What about the overhead?</a> ###
 
 

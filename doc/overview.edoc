@@ -97,6 +97,20 @@ lookup_global_entity({person, Person}) ->
 
 Full implementations under _example/_.
 
+== How do I configure it? ==
+app.config:
+
+<pre lang="erlang">
+[{erlwitness, [
+            % Optional; module implementing 'erlwitness_lookup' behaviour
+            %{entity_lookup_module, erlwitness_index_serv}, 
+            %
+            % Optional; defaults to 10 * NumberOfSchedulers
+            %{erlwitness_index_serv_count, N :: pos_integer()} 
+            ]}
+    ].
+</pre>
+
 == What about the overhead? ==
 This software is built on the premise that watchers are few, rare, and mostly limited
 to development environments; therefore watching is heavy and privacy is light.
