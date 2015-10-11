@@ -77,7 +77,7 @@ handle_geninfo_event(Timestamp, {person, Person}, PersonPid, PersonProcType,
 handle_newstate_event(Timestamp, {person, Person}, PersonPid, PersonProcType,
                       PersonProcName, PersonState, State) ->
     io:format("Here's a new state: ~p~n", [{Timestamp, Person, PersonPid,
-                                            PersonProcType, Info}]),
+                                            PersonProcType, PersonState}]),
     {noreply, State}.
 % ..
 </pre>
