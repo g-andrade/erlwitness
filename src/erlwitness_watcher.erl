@@ -81,7 +81,7 @@
 -define(WITNESSED_EVENT(Timestamp, Entity, EntityPid, EntityProcType, EntityProcName, Event),
         {'WITNESS', Timestamp, {Entity, EntityPid, EntityProcType, EntityProcName}, Event}).
 
--type dbg_fun_state() :: active | idle.
+-type dbg_fun_state() :: active | done.
 -type dbg_fun() :: fun ((FuncState :: dbg_fun_state(), Event :: any(), ProcName :: any())
                         -> NewFuncState :: dbg_fun_state()).
 
@@ -293,9 +293,9 @@ report_dbg_event(Watcher, Timestamp, Entity, EntityPid, EntityProcType, EntityPr
     -> {dbg_fun(), FuncState :: active}.
 dbg_fun(Entity, EntityProcType, Watcher) ->
     Fun = fun
-        (_PrevState, Event, EntityProcName) ->
+        (active, Event, EntityProcName) ->
             case erlwitness_lobby:is_entity_watched_by(Entity, Watcher) of
-                false -> idle;
+                false -> done;
                 true  ->
                     Timestamp = os:timestamp(),
                     ok = report_dbg_event(Watcher, Timestamp, Entity, self(),
