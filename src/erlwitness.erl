@@ -52,8 +52,10 @@ get_starting_extras(Entity, EntityProcType, Args, BaseStartOptions) ->
                                          args = Args},
     {WrappedInitArgs, StartOptions}.
 
+
 -spec unwrap_init_args(WrappedInitArgs :: #wrapped_init_args{}) -> term().
 unwrap_init_args(#wrapped_init_args{ args=Args }) -> Args.
+
 
 -spec finalize_init(#wrapped_init_args{}, InitResult :: init_result()) -> init_result().
 finalize_init(#wrapped_init_args{}, ignore) ->

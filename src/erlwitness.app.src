@@ -9,5 +9,8 @@
                 stdlib
                 ]},
         {mod, { erlwitness_app, []}},
-        {env, []}
+        {env, [
+                %{entity_lookup_module, erlwitness_index_serv}, % Module implementing 'erlwitness_lookup' behaviour
+                %{erlwitness_index_serv_count, N :: pos_integer()} % Optional
+                ]}
         ]}.

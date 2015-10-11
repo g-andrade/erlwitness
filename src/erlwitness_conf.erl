@@ -6,7 +6,8 @@
 
 -spec get_lookup_module() -> module().
 get_lookup_module() ->
-    application:get_env(erlwitness, lookup_module, erlwitness_index_serv).
+    {ok, V} = application:get_env(erlwitness, entity_lookup_module),
+    V.
 
 -spec use_internal_indexing() -> boolean().
 use_internal_indexing() ->
@@ -14,4 +15,5 @@ use_internal_indexing() ->
 
 -spec get_index_serv_count() -> pos_integer().
 get_index_serv_count() ->
-    application:get_env(erlwitness, index_serv_count, 10 * erlang:system_info(schedulers_online)).
+    application:get_env(erlwitness, erlwitness_index_serv_count,
+                        10 * erlang:system_info(schedulers_online)).

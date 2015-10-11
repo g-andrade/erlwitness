@@ -18,7 +18,7 @@ compile:
 	@$(REBAR) compile
 
 test: compile
-	@$(REBAR) eunit skip_deps=true
+	@ERL_AFLAGS="-config test/erlwitness_tests.app.config" $(REBAR) eunit skip_deps=true
 
 clean:
 	@$(REBAR) clean
