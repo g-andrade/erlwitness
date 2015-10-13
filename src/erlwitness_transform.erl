@@ -8,6 +8,11 @@
 
 -include_lib("lager/include/lager.hrl").
 
+-ifndef(LEVELS_UNSAFE).
+-define(LEVELS_UNSAFE, []). % Not present in older lager versions
+-endif.
+
+
 %% @private
 parse_transform(AST, _Options) ->
     walk_ast([], AST).
